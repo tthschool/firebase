@@ -18,7 +18,9 @@ const deviceName = ref('')
 const productName = ref('')
 const updatedTime = ref('')
 const error = ref('')
+
 const connectionStatus = ref()
+
 const getDevice = () => {
     const deviceRef = dbRef(database, `/${props.deviceNo}`);
     onValue(deviceRef, (snapshot) => {
@@ -33,29 +35,30 @@ const getDevice = () => {
 };
 
 const connectedRef = dbRef(database, "/.info/connected");
-onValue(connectedRef, (snapshot) => {
-    if (snapshot.val() === true) {
-        connectionStatus.value = true
-    } else {
-        connectionStatus.value = false
-    }
+    onValue(connectedRef, (snapshot) => {
+        if (snapshot.val() === true) {
+            connectionStatus.value = true
+        } else {
+            connectionStatus.value = false
+        }
 });
-const disconnectFirebase = () => {
-    goOffline(database);
-    isOffline.value = true;
+
+const reconnectFirebase = () => {
+    isOffline.value = !isOffline.value
+    if(isOffline.value) {
+        goOffline(database);
+    } else {
+        goOnline(database);
+    }
 };
 
-// 🔹 Kết nối lại Firebase
-const reconnectFirebase = () => {
-    goOnline(database);
-    isOffline.value = false;
-};
+    
 const isOffline = ref(false)
 onMounted(getDevice);
+
 </script>
 
 <template>
-     <button @click="disconnectFirebase" v-if="!isOffline">🛑 Ngắt kết nối Firebase</button>
-     <button @click="reconnectFirebase" v-if="isOffline">🔄 Kết nối lại Firebase</button>
-    <Sample :device-name="deviceName" :product-name="productName" :error="error" :updated-time="updatedTime" :connection-status="connectionStatus" ></Sample>
+    
+    <Sample :device-name="deviceName" :product-name="productName" :error="error" :updated-time="updatedTime" :connection-status="connectionStatus" @connection-controller="reconnectFirebase" ></Sample>
 </template>
