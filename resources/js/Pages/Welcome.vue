@@ -1,10 +1,10 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
 import { getDatabase, ref as dbRef, onValue, goOffline, goOnline  } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-database.js";
 import { firebaseConfig } from "@/Const/firebaseconfig";
 import Sample from '@/Pages/Sample.vue';
-import { formatTime } from '@/Const/firebaseconfig';
+import { formatTime,playAudio } from '@/Const/firebaseconfig';
 
 
 const props = defineProps({
@@ -30,6 +30,14 @@ const getDevice = () => {
             productName.value = data.product_name
             error.value = data.error
             updatedTime.value  = formatTime(new Date(data.updated_time))
+            if(data.error === false) {
+                    for (let i = 0; i < 10; i++) {
+                    setTimeout(() => {
+                        playAudio();
+                    }, i * 1000);
+                }
+            }
+
         }
     });
 };
@@ -52,7 +60,6 @@ const reconnectFirebase = () => {
     }
 };
 
-    
 const isOffline = ref(false)
 onMounted(getDevice);
 
